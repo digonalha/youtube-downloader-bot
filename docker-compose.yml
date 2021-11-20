@@ -1,0 +1,32 @@
+version: "3.8"
+
+services:
+  api:
+    container_name: youtube_downloader_bot
+    build: ./src/
+    command: python3 main.py
+    restart: always
+    expose:
+      - "5000"
+    environment:
+      - TERM=xterm
+  rabbitmq:
+    container_name: rabbitmq
+    image: arm32v7/rabbitmq
+    ports:
+      - 5672:5672
+    volumes:
+      - ./src:/app
+      - ./src/media:/app/media
+  worker:
+    container_name: celery_worker
+    build:
+      context: ./src/
+    entrypoint: celery
+    command: -A tasks worker --loglevel=INFO -P eventlet --concurrency=1
+    restart: always
+    volumes:
+      - ./src:/app
+    depends_on:
+      - api
+      - rabbitmq

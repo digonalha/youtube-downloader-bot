@@ -3,7 +3,7 @@ import os
 import subprocess
 from telegram import send_audio, send_video
 
-app = Celery(broker="pyamqp://guest@localhost/")
+app = Celery(broker="pyamqp://guest@rabbitmq:5672/")
 
 
 def create_temp_folder():
@@ -32,7 +32,7 @@ def download(video_url: str, extract_audio: bool, chat_id: str):
             file_format = '-f "ba" -x --audio-format mp3'
 
         command = f'yt-dlp {file_format} {video_url} -o "./temp/%(title)s.%(ext)s"'
-
+        print("***************************")
         subprocess.Popen(command, shell=True).wait()
 
         files = os.listdir("./temp/")
